@@ -85,6 +85,9 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: 'pll-five', name: 'Five perms', description: 'Log a solve on five different PLL cases.' },
   { id: 'first-timed', name: 'Clock started', description: 'Finish a timed sandbox solve.' },
   { id: 'daily-done', name: 'Quota', description: 'Finish today’s 20 trainer reps.' },
+  { id: 'roux-first-block', name: 'Block one', description: 'Finish the First Block lesson.' },
+  { id: 'roux-cmll-five', name: 'Five corners', description: 'Log a solve on five different CMLL cases.' },
+  { id: 'roux-graduate', name: 'Roux graduate', description: 'Complete every Roux lesson.' },
 ]
 
 export const defaultProgress = (): ProgressSnapshot => ({
@@ -271,6 +274,25 @@ function unlockedAchievements(state: ProgressSnapshot): string[] {
     earned.push('cfop-graduate')
   }
   if ((state.dailyDrill?.reps ?? 0) >= DAILY_DRILL_TARGET) earned.push('daily-done')
+  if (have.has('roux-first-block')) earned.push('roux-first-block')
+  if (
+    Object.entries(state.caseStats).filter(([id, row]) => id.startsWith('roux-cmll-') && row.solves > 0).length >= 5
+  ) {
+    earned.push('roux-cmll-five')
+  }
+  if (
+    [
+      'roux-intro',
+      'roux-first-block',
+      'roux-second-block',
+      'roux-cmll',
+      'roux-lse-eo',
+      'roux-lse-edges',
+      'roux-lse-l6e',
+    ].every((id) => have.has(id))
+  ) {
+    earned.push('roux-graduate')
+  }
   return earned
 }
 

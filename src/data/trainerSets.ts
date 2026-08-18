@@ -5,6 +5,7 @@ import {
   cfopPllIds,
   cfopPllTwoLookIds,
 } from './methods/cfop/ids'
+import { rouxCmllIds } from './methods/roux/ids'
 
 export const beginnerLastLayerIds = [
   'beginner-yellow-dot',
@@ -60,6 +61,12 @@ export const trainerSets: TrainerSet[] = [
     name: 'Beginner last layer',
     summary: 'The yellow-cross, Sune, and U-perm cases from the beginner course.',
     caseIds: beginnerLastLayerIds,
+  },
+  {
+    id: 'cmll',
+    name: 'CMLL',
+    summary: 'All 42 Roux corner cases, grouped by permutation family.',
+    caseIds: [...rouxCmllIds],
   },
 ]
 

@@ -12,7 +12,20 @@ export function CaseBrowserPage() {
   const masteredCases = useProgressStore((state) => state.masteredCases)
   const method = methodsById[methodId]
   const cases = method ? casesForMethod(method.id) : []
-  const primaryFamilies = ['cross', 'f2l', 'oll', 'pll', 'edges', 'corners', 'both']
+  const primaryFamilies = [
+    'cross',
+    'f2l',
+    'oll',
+    'pll',
+    'edges',
+    'corners',
+    'both',
+    'first-block',
+    'second-block',
+    'cmll',
+    'eo',
+    'l6e',
+  ]
   const families = [
     'all',
     ...primaryFamilies.filter((name) => cases.some((entry) => entry.tags.includes(name) || entry.group === name)),
