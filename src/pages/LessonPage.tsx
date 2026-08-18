@@ -17,6 +17,8 @@ const TRAINER_FOR_STEP: Record<string, string> = {
   'beginner-yellow-corners-permute': '/train/beginner-ll',
   'beginner-yellow-edges-permute': '/train/beginner-ll',
   'roux-cmll': '/train/cmll',
+  'zz-ocll': '/train/zz-ocll',
+  'zz-pll': '/train/zz-pll',
 }
 
 export function LessonPage() {

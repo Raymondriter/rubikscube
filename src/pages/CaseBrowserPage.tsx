@@ -25,6 +25,8 @@ export function CaseBrowserPage() {
     'cmll',
     'eo',
     'l6e',
+    'ocll',
+    'eoline',
   ]
   const families = [
     'all',

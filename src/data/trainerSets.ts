@@ -6,6 +6,7 @@ import {
   cfopPllTwoLookIds,
 } from './methods/cfop/ids'
 import { rouxCmllIds } from './methods/roux/ids'
+import { zzOcllIds, zzPllIds } from './methods/zz/ids'
 
 export const beginnerLastLayerIds = [
   'beginner-yellow-dot',
@@ -67,6 +68,18 @@ export const trainerSets: TrainerSet[] = [
     name: 'CMLL',
     summary: 'All 42 Roux corner cases, grouped by permutation family.',
     caseIds: [...rouxCmllIds],
+  },
+  {
+    id: 'zz-ocll',
+    name: 'OCLL',
+    summary: 'The 7 pure corner-orientation cases ZZ needs once edges are pre-oriented.',
+    caseIds: [...zzOcllIds],
+  },
+  {
+    id: 'zz-pll',
+    name: 'ZZ PLL',
+    summary: 'The same 21 permutations as CFOP, drilled from the ZZ track.',
+    caseIds: [...zzPllIds],
   },
 ]
 

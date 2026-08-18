@@ -88,6 +88,8 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: 'roux-first-block', name: 'Block one', description: 'Finish the First Block lesson.' },
   { id: 'roux-cmll-five', name: 'Five corners', description: 'Log a solve on five different CMLL cases.' },
   { id: 'roux-graduate', name: 'Roux graduate', description: 'Complete every Roux lesson.' },
+  { id: 'zz-eoline', name: 'Straight line', description: 'Finish the EOLine lesson.' },
+  { id: 'zz-graduate', name: 'ZZ graduate', description: 'Complete every ZZ lesson.' },
 ]
 
 export const defaultProgress = (): ProgressSnapshot => ({
@@ -292,6 +294,10 @@ function unlockedAchievements(state: ProgressSnapshot): string[] {
     ].every((id) => have.has(id))
   ) {
     earned.push('roux-graduate')
+  }
+  if (have.has('zz-eoline')) earned.push('zz-eoline')
+  if (['zz-intro', 'zz-eoline', 'zz-f2l', 'zz-ocll', 'zz-pll'].every((id) => have.has(id))) {
+    earned.push('zz-graduate')
   }
   return earned
 }
