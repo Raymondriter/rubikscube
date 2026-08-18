@@ -229,7 +229,7 @@ export function TrainerSessionPage() {
             >
               Recognize
             </button>
-            {(set.id === 'pll' || set.id === 'pll-2look') && (
+            {(set.id === 'pll' || set.id === 'pll-2look' || set.id === 'cmll' || set.id === 'zz-ocll') && (
               <button
                 type="button"
                 onClick={() => writeParams('sides')}
@@ -244,7 +244,7 @@ export function TrainerSessionPage() {
           {mode === 'execute'
             ? `Solve it. Space starts and goes to the next case. ${aufExecute ? 'A random U turn is applied — AUF, then the alg. ' : ''}+${TRAINER_SOLVE_XP} XP per solve.`
             : mode === 'sides'
-              ? 'Name the PLL from two last-layer sides only — how you recognize in a real solve. Keys 1–4.'
+              ? 'Name the case from two last-layer sides only — how you recognize in a real solve. Keys 1–4.'
               : `Name the case. A random U turn is applied so you can't memorize one picture. Keys 1–4 pick an answer. +${TRAINER_RECOGNIZE_XP} XP if you're right.`}
         </p>
         {lockedId && (

@@ -99,6 +99,16 @@ export function TrainerHomePage() {
           Name the perm from two last-layer sides only — the view you get in a real solve.
         </p>
       </Link>
+
+      <Link
+        to="/train/cmll?mode=sides"
+        className="mt-3 block rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-sm transition hover:border-brand-500/40"
+      >
+        <p className="font-medium text-white">2-sided CMLL recognition</p>
+        <p className="mt-1 text-white/45">
+          Name the CMLL case from two last-layer sides only — same corners-only recognition, Roux's track.
+        </p>
+      </Link>
     </div>
   )
 }
