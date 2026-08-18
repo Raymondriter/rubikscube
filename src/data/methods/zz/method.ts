@@ -1,5 +1,5 @@
 import type { LessonStep, Method } from '../../types'
-import { zzEolineIds, zzF2lIds } from './ids'
+import { zzEolineIds, zzF2lIds, zzOcllIds, zzPllIds } from './ids'
 
 const steps: LessonStep[] = [
   {
@@ -42,6 +42,28 @@ Every slot reduces to the same shape, mirrored: \`R U R' U'\` for front-right, \
 For corners that are awkwardly placed, the **keyhole** trick helps: pull the empty slot's edge out of the way with a U move first, drop the corner in from the "open" side, then replace the edge — no new algorithm, just a different entry point into the same trigger.
 
 This covers the common shapes intuitively, matching how ZZ is actually taught at the beginner level. A fuller RUL-only case set (closer to CFOP's case-table treatment of F2L) is a legitimate later addition if you want faster recognition.`,
+  },
+  {
+    id: 'zz-ocll',
+    method: 'zz',
+    title: 'OCLL · 7 cases',
+    practiceMode: 'quiz',
+    xpReward: 30,
+    demoCaseIds: [...zzOcllIds],
+    bodyMd: `Every edge is already oriented from EOLine, so the last layer never needs full OLL — just these 7 cases that orient the 4 corners and nothing else. Same algorithms as CFOP's OLL 21-27, since the geometry at this point in the solve is identical either way.
+
+Two of these — Sune and Anti-Sune — you may already recognize from 2-look OLL if you've touched CFOP. The other five (H, Pi, U, T, L) round out every remaining corner-orientation shape.`,
+  },
+  {
+    id: 'zz-pll',
+    method: 'zz',
+    title: 'PLL · 21 cases',
+    practiceMode: 'quiz',
+    xpReward: 40,
+    demoCaseIds: [...zzPllIds],
+    bodyMd: `The same full 21-case PLL CFOP finishes with — nothing about permutation changes between methods, only how you got here. Recognition works the same way: headlights, and how the edges cycle.
+
+This is the payoff for EOLine: everything from here to a solved cube is identical to CFOP's last two steps, just reached with a smaller, RUL-heavy F2L instead of 41 memorized cases.`,
   },
 ]
 
