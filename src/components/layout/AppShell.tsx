@@ -1,0 +1,73 @@
+import { Link, NavLink, Outlet } from 'react-router-dom'
+import { useProgressStore } from '../../state/progressStore'
+import { Onboarding } from '../onboarding/Onboarding'
+import { XpBar } from '../progress/XpBar'
+
+const navClass = ({ isActive }: { isActive: boolean }) =>
+  `rounded-full px-3 py-1.5 text-sm transition ${
+    isActive ? 'bg-white/10 text-white' : 'text-white/55 hover:text-white'
+  }`
+
+export function AppShell() {
+  const xp = useProgressStore((state) => state.xp)
+  const streakDays = useProgressStore((state) => state.streakDays)
+
+  return (
+    <div className="relative min-h-screen overflow-hidden pb-[env(safe-area-inset-bottom)]">
+      <div
+        className="pointer-events-none absolute inset-0 -z-10"
+        style={{
+          background:
+            'radial-gradient(60% 50% at 50% 0%, color-mix(in oklab, var(--color-brand-500) 18%, transparent), transparent 70%), radial-gradient(40% 40% at 90% 80%, color-mix(in oklab, var(--color-cube-green) 8%, transparent), transparent)',
+        }}
+      />
+
+      <header className="sticky top-0 z-20 border-b border-white/5 bg-ink-950/80 backdrop-blur-md">
+        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-4 px-4">
+          <Link to="/" className="flex items-center gap-2 font-semibold tracking-tight text-white">
+            <span className="grid h-7 w-7 place-items-center rounded-lg bg-brand-500 text-xs font-bold">3×3</span>
+            Twist
+          </Link>
+          <nav className="flex items-center gap-1">
+            <NavLink to="/" end className={navClass}>
+              Learn
+            </NavLink>
+            <NavLink to="/train" className={navClass}>
+              Train
+            </NavLink>
+            <NavLink to="/sandbox" className={navClass}>
+              Sandbox
+            </NavLink>
+            <NavLink to="/badges" className={`${navClass} hidden sm:inline-flex`}>
+              Badges
+            </NavLink>
+            <NavLink to="/settings" className={`${navClass} hidden sm:inline-flex`}>
+              Settings
+            </NavLink>
+          </nav>
+          <div className="flex items-center gap-3">
+            {streakDays > 0 && (
+              <span className="hidden text-xs text-orange-300 sm:inline" title="Day streak">
+                {streakDays}d streak
+              </span>
+            )}
+            <XpBar xp={xp} compact />
+          </div>
+        </div>
+      </header>
+
+      <main className="mx-auto w-full max-w-5xl px-4 py-8">
+        <Outlet />
+        <nav className="mt-10 flex justify-center gap-5 text-xs text-white/40 sm:hidden">
+          <Link to="/badges" className="hover:text-white/70">
+            Badges
+          </Link>
+          <Link to="/settings" className="hover:text-white/70">
+            Settings
+          </Link>
+        </nav>
+      </main>
+      <Onboarding />
+    </div>
+  )
+}
