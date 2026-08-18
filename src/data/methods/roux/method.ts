@@ -1,6 +1,7 @@
 import type { LessonStep, Method } from '../../types'
 import {
   rouxCmllIds,
+  rouxEolrIds,
   rouxFirstBlockIds,
   rouxLseEdgesIds,
   rouxLseEoIds,
@@ -96,7 +97,22 @@ Get both target edges down to D, angle the cube so a plain \`M2\` drops them str
 
 If the two white (D-layer) edges need to swap simultaneously, \`M2 U2 M2 U2\` does both at once — the only "trick" worth remembering here. Everything else is: reposition with \`U\`, fire \`M2\`, recheck, repeat until solved.
 
-This is intentionally kept intuitive rather than a full algorithm table — that matches how Roux is actually taught (see \`AGENTS.md\`). A dedicated EOLR/full-L6E case set is a reasonable later addition if you want to push execution speed further.`,
+This is intentionally kept intuitive rather than a full algorithm table — that matches how Roux is actually taught (see \`AGENTS.md\`). The next step, EOLR, is that dedicated case set, for when you're ready to trade intuition for speed.`,
+  },
+  {
+    id: 'roux-eolr',
+    method: 'roux',
+    title: 'EOLR · 47 cases (advanced)',
+    practiceMode: 'quiz',
+    xpReward: 50,
+    demoCaseIds: [...rouxEolrIds],
+    bodyMd: `**Optional, advanced.** EOLR ("Edge Orientation Left/Right") collapses the last two intuitive steps — orient the 6 edges, then place UL/UR — into a single memorized algorithm, recognized in one look instead of two passes.
+
+Recognition: count how many of the 6 LSE edges are misoriented (0, 2, 4, or 6), then note which specific edges are out of place. That combination is the case — same M/U-only move set as the intuitive method, just one lookup instead of a repositioning loop.
+
+47 cases, grouped by family: **Arrow** (4), **1/1** (11), **2 Adj/2** (7), **2 Adj/0** (7), **2 Opp/2** (6), **2 Opp/0** (6), **0/2** (4), **All 6** (2). One case (2 Opp/0, DF/DB) has no M/U-only solution in the published source and genuinely needs R/U/M — a documented exception, not a typo.
+
+This isn't required to finish Roux — the intuitive EO + edge-placement steps above get you to a solved cube just fine. EOLR is purely for solvers chasing faster execution.`,
   },
 ]
 

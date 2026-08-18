@@ -16,3 +16,8 @@ export const rouxLseEdgesIds = [
 ] as const
 
 export const rouxLseL6eIds = ['roux-lse-l6e-example-1', 'roux-lse-l6e-example-2', 'roux-lse-l6e-example-3'] as const
+
+export const rouxEolrIds = Array.from(
+  { length: 47 },
+  (_, index) => `roux-eolr-${String(index + 1).padStart(2, '0')}`,
+)
