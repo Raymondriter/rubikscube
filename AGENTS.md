@@ -1,6 +1,6 @@
 # Twist (rubikscube)
 
-Interactive 3×3 tutorial: beginner method, then CFOP or Roux, with a live Three.js cube.
+Interactive 3×3 tutorial: beginner method, then CFOP, Roux, or ZZ, with a live Three.js cube.
 
 ## Run
 
@@ -34,17 +34,17 @@ Vite, React 19, TypeScript, Tailwind 4, Three.js (no R3F), Zustand persist, Reac
 
 ## What to build next (updated 2026-08-18)
 
-**Roux shipped** (`RUBIKSCUBE-4`, all 5 child tickets Done): `roux-intro`, First/Second Block (freeform, worked examples), full 42-case CMLL (`src/data/methods/roux/cmll.ts`, sourced from Kian Mansour's CMLL sheet), and LSE in 3 steps (EO/UL-UR/finish, each taught via the one M/U "arrow" trigger + intuition rather than a fixed case table - confirmed against a real Roux tutorial, not assumed). Wired into the trainer (`cmll` set), case browser family filters, and achievements. ZZ (`RUBIKSCUBE-5`) is still explicitly parked - only start it if someone actually wants a third method.
+**All four methods now ship**: beginner, CFOP, Roux (`RUBIKSCUBE-4`), and ZZ (`RUBIKSCUBE-5`) — every phase-0-through-4 epic is Done. ZZ's 5 steps: `zz-intro`, `zz-eoline` (freeform, worked examples - EOLine is decision-tree taught, not a case table, confirmed against a real beginner ZZ guide), `zz-f2l` (freeform, RUL-only - the 4 mirror algorithms are genuinely sourced, not invented; ZZ's F2L is *not* CFOP's 41-case set, since CFOP F2L uses F/B which would break ZZ's edge orientation), `zz-ocll` and `zz-pll` (case-based, **cloned** from CFOP's OLL 21-27 and full PLL via `src/data/methods/zz/lastLayer.ts`'s `cloneForZz` helper - same physical algorithms, just re-tagged with `method: 'zz'` since `cases.test.ts` requires every case's `method` field to match its owning `Method`). Wired into the trainer (`zz-ocll`/`zz-pll` sets), case browser family filters, and achievements.
 
-Shipped before that: lazy routes, trainer (execute/recognize/2-sided PLL), sandbox timer with +2/DNF, daily drill quota (20 reps + today's set), weak-case review and single-case drill (`?case=`).
+**New: Phase 7 Monetization epic** (`RUBIKSCUBE-43`, 8 child tickets, all To Do) - tip jar, cosmetic cube-skin unlocks, cube-retailer affiliate link. No ads, no paywalled lessons. The real architectural note: this app is currently 100% static (no backend, no accounts) - a real cosmetic purchase needs *some* server-side entitlement check, which is a genuine "first backend" decision (`RUBIKSCUBE-45` scopes it: Vercel serverless + Stripe Checkout, account-less vs. accounts tradeoff). Account creation and affiliate applications need Raymond directly.
 
-`RUBIKSCUBE-24` (real-device drag-to-twist check) is closed: verified via the iOS Simulator's genuine WebKit touch engine — a face-drag committed a real layer twist (Solved -> Scrambled), a background-drag correctly fell through to orbit. Requires `sudo xcode-select -s /Applications/Xcode.app/Contents/Developer` to be run once on a fresh machine before the Simulator MCP tool works.
+Shipped earlier: lazy routes, trainer (execute/recognize/2-sided PLL), sandbox timer with +2/DNF, daily drill quota (20 reps + today's set), weak-case review and single-case drill (`?case=`). `RUBIKSCUBE-24` (real-device drag-to-twist check) is closed: verified via the iOS Simulator's genuine WebKit touch engine.
 
-Fixed in passing: every 3-letter corner entry in CFOP's `recognitionHighlight` arrays (`oll.ts`/`pll.ts`/`f2l.ts`) used the wrong letter order (`UFR` instead of the engine's canonical `URF`) and silently never matched a cubie - corner recognition highlights had never actually lit up. Fixed to the `slotIdFromCoords` (U/D, then R/L, then F/B) convention; Roux's own data was authored with the correct order from the start.
+Fixed in passing: every 3-letter corner entry in CFOP's `recognitionHighlight` arrays (`oll.ts`/`pll.ts`/`f2l.ts`) used the wrong letter order (`UFR` instead of the engine's canonical `URF`) and silently never matched a cubie - corner recognition highlights had never actually lit up. Fixed to the `slotIdFromCoords` (U/D, then R/L, then F/B) convention; Roux and ZZ's own data were authored with the correct order from the start.
 
 Still later:
 
-1. A dedicated EOLR / full-L6E algorithm table for Roux, if someone wants to push past the current intuitive-LSE teaching toward faster execution. Not required — matches how Roux is actually taught at the level this course covers.
-2. A CMLL-equivalent of the PLL-only "2-sided recognition" trainer mode (`twoSidedPllView` in `src/data/pllView.ts`, gated to `set.id === 'pll'` in `TrainerSessionPage.tsx`) — CMLL is corners-only so the same `lastLayerSideColors` primitive would work, just needs the wiring. Stretch, not required.
-3. Phase 6's epic description mentions lazy-loading each method's content by route (so Beginner doesn't pull in all 119 CFOP + 42 CMLL records) — not done, `src/data/methods/index.ts` combines `allCases` eagerly. Never broken into a concrete ticket; not urgent at current bundle size (Three.js dominates the bundle, not case data).
-4. ZZ (`RUBIKSCUBE-5`) stays parked on purpose.
+1. A dedicated EOLR / full-L6E algorithm table for Roux, and a fuller RUL-only case set for ZZ's F2L, if someone wants to push past the current intuitive teaching toward faster execution. Neither is required — matches how both methods are actually taught at the level this course covers.
+2. A CMLL/OCLL-equivalent of the PLL-only "2-sided recognition" trainer mode (`twoSidedPllView` in `src/data/pllView.ts`, gated to `set.id === 'pll'` in `TrainerSessionPage.tsx`) — both are corners-only so the same `lastLayerSideColors` primitive would work, just needs the wiring. Stretch, not required.
+3. Phase 6's epic description mentions lazy-loading each method's content by route (so Beginner doesn't pull in all 119 CFOP + 42 CMLL + 35 ZZ records) — not done, `src/data/methods/index.ts` combines `allCases` eagerly. Never broken into a concrete ticket; not urgent at current bundle size (Three.js dominates the bundle, not case data).
+4. Phase 7 (Monetization) — see above, all 8 tickets To Do.
