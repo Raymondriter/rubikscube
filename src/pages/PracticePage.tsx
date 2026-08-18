@@ -4,6 +4,7 @@ import { CubeCanvas, type CubeCanvasHandle } from '../components/cube/CubeCanvas
 import { MoveKeypad } from '../components/practice/MoveKeypad'
 import { Celebration } from '../components/progress/Celebration'
 import { primaryAlgorithm, studentAlgorithm } from '../data/algorithm'
+import { playSolveChime, playTwistClick } from '../engine/sound'
 import { casesForStep, methodById, stepById } from '../data/methods'
 import { PRACTICE_XP } from '../state/progress'
 import { useProgressStore } from '../state/progressStore'
@@ -63,9 +64,11 @@ export function PracticePage() {
   const hintAlg = studentAlgorithm(primaryAlgorithm(cubeCase))
 
   const checkSolved = () => {
+    playTwistClick()
     if (won) return
     if (cubeRef.current?.getIsColorSolved()) {
       setWon(true)
+      playSolveChime()
       if (!alreadyMastered) {
         masterCase(cubeCase.id)
         setAwarded(true)

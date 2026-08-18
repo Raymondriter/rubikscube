@@ -33,6 +33,7 @@ interface ProgressActions {
   setTrainerOrder: (trainerOrder: TrainerOrder) => void
   setOnboarded: (onboarded: boolean) => void
   setAufExecute: (aufExecute: boolean) => void
+  setSound: (sound: boolean) => void
   ensureDailyDrill: () => void
 }
 
@@ -61,6 +62,7 @@ export const useProgressStore = create<ProgressStore>()(
         set((state) => ({ settings: { ...state.settings, onboarded } satisfies ProgressSettings })),
       setAufExecute: (aufExecute) =>
         set((state) => ({ settings: { ...state.settings, aufExecute } satisfies ProgressSettings })),
+      setSound: (sound) => set((state) => ({ settings: { ...state.settings, sound } satisfies ProgressSettings })),
       ensureDailyDrill: () => set((state) => ensureDailyDrill(state)),
     }),
     {

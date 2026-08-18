@@ -2,6 +2,7 @@ import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react'
 import { CubeRenderer } from '../../engine/render/CubeRenderer'
 import { CubeInteraction } from '../../engine/render/CubeInteraction'
 import { setColorblindStickers } from '../../engine/render/materials'
+import { setSoundEnabled } from '../../engine/sound'
 import { useProgressStore } from '../../state/progressStore'
 
 export interface CubeCanvasHandle {
@@ -38,6 +39,7 @@ export const CubeCanvas = forwardRef<CubeCanvasHandle, CubeCanvasProps>(function
   ref,
 ) {
   const colorblind = useProgressStore((state) => state.settings.colorblind ?? false)
+  const sound = useProgressStore((state) => state.settings.sound ?? true)
   const containerRef = useRef<HTMLDivElement>(null)
   const rendererRef = useRef<CubeRenderer | null>(null)
   const onSolvedRef = useRef(onSolvedChange)
@@ -89,6 +91,10 @@ export const CubeCanvas = forwardRef<CubeCanvasHandle, CubeCanvasProps>(function
     setColorblindStickers(colorblind)
     rendererRef.current?.setLetterOverlaysVisible(colorblind)
   }, [colorblind])
+
+  useEffect(() => {
+    setSoundEnabled(sound)
+  }, [sound])
 
   useImperativeHandle(ref, () => ({
     scramble: (length) => rendererRef.current?.scramble(length) ?? [],

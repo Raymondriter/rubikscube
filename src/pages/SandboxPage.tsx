@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { CubeCanvas, type CubeCanvasHandle } from '../components/cube/CubeCanvas'
 import { MoveKeypad } from '../components/practice/MoveKeypad'
 import { btnGhost, btnPrimary, cubeStageClass, cubeStageStyle } from '../components/ui/styles'
+import { playSolveChime, playTwistClick } from '../engine/sound'
 import { averageOfFive, formatTime, formatTimedSolve, sessionSummary } from '../state/progress'
 import { useProgressStore } from '../state/progressStore'
 
@@ -11,6 +12,7 @@ export function SandboxPage() {
   const cubeRef = useRef<CubeCanvasHandle>(null)
   const startedAtRef = useRef(0)
   const recordedRef = useRef(false)
+  const suppressNextChimeRef = useRef(false)
   const [solved, setSolved] = useState(true)
   const [busy, setBusy] = useState(false)
   const [lastScramble, setLastScramble] = useState<string[]>([])
@@ -104,9 +106,14 @@ export function SandboxPage() {
           className="h-full w-full"
           onSolvedChange={(value) => {
             setSolved(value)
-            if (value) finish()
+            if (value) {
+              finish()
+              if (!suppressNextChimeRef.current) playSolveChime()
+              suppressNextChimeRef.current = false
+            }
           }}
           onBusyChange={setBusy}
+          onMove={playTwistClick}
         />
         <div
           className={`pointer-events-none absolute left-4 top-4 rounded-full px-3 py-1 font-mono text-sm ${
@@ -145,6 +152,7 @@ export function SandboxPage() {
         <button
           type="button"
           onClick={() => {
+            suppressNextChimeRef.current = true
             cubeRef.current?.reset()
             setLastScramble([])
             setPhase('idle')

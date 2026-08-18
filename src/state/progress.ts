@@ -1,7 +1,7 @@
 import { beginnerMethod } from '../data/methods/beginner'
 import { trainerSets } from '../data/trainerSets'
 
-export const PROGRESS_VERSION = 6
+export const PROGRESS_VERSION = 7
 export const XP_PER_LEVEL = 50
 export const PRACTICE_XP = 20
 export const TRAINER_SOLVE_XP = 5
@@ -19,6 +19,7 @@ export interface ProgressSettings {
   trainerOrder: TrainerOrder
   onboarded: boolean
   aufExecute: boolean
+  sound: boolean
 }
 
 export interface CaseStats {
@@ -109,6 +110,7 @@ export const defaultProgress = (): ProgressSnapshot => ({
     trainerOrder: 'weighted',
     onboarded: false,
     aufExecute: true,
+    sound: true,
   },
 })
 

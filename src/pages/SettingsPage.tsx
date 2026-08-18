@@ -8,6 +8,7 @@ export function SettingsPage() {
   const setTrainerOrder = useProgressStore((state) => state.setTrainerOrder)
   const setAufExecute = useProgressStore((state) => state.setAufExecute)
   const setOnboarded = useProgressStore((state) => state.setOnboarded)
+  const setSound = useProgressStore((state) => state.setSound)
 
   return (
     <div className="mx-auto max-w-xl">
@@ -25,6 +26,17 @@ export function SettingsPage() {
             type="checkbox"
             checked={settings.colorblind ?? false}
             onChange={(event) => setColorblind(event.target.checked)}
+          />
+        </li>
+        <li className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+          <div>
+            <p className="font-medium text-white">Sound</p>
+            <p className="text-xs text-white/45">A soft click on twists, a chime when you solve.</p>
+          </div>
+          <input
+            type="checkbox"
+            checked={settings.sound ?? true}
+            onChange={(event) => setSound(event.target.checked)}
           />
         </li>
         <li className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
