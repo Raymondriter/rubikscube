@@ -32,15 +32,17 @@ Vite, React 19, TypeScript, Tailwind 4, Three.js (no R3F), Zustand persist, Reac
 - F2L cases are the FR slot; other slots are a `y` rotation.
 - Jira project creation needs `~/.claude/secrets/atlassian.env` (the MCP connector cannot create projects). Issues/comments go through the API or Jira MCP.
 
-## What to build next (researched 2026-08-18)
+## What to build next (updated 2026-08-18)
 
 Do **not** start Roux or ZZ next. CFOP is the method almost everyone uses after beginner; Roux/ZZ are minority second methods. We already shipped 119 CFOP cases as a catalog. The gap versus J Perm / SpeedCubeDB is a **daily drill loop** (trainer, recognition, times) — that work started in `/train`.
 
 Shipped: lazy routes, trainer (execute/recognize/2-sided PLL), sandbox timer with +2/DNF, daily drill quota (20 reps + today’s set), weak-case review and single-case drill (`?case=`).
 
+`RUBIKSCUBE-24` (real-device drag-to-twist check) is closed: verified via the iOS Simulator's genuine WebKit touch engine — a face-drag committed a real layer twist (Solved -> Scrambled), a background-drag correctly fell through to orbit. Requires `sudo xcode-select -s /Applications/Xcode.app/Contents/Developer` to be run once on a fresh machine before the Simulator MCP tool works.
+
 Still later:
 
-1. Real-phone check of drag-to-twist (`RUBIKSCUBE-24`).
-2. Roux only if someone actually wants a second method.
+1. Roux only if someone actually wants a second method.
+2. Phase 6's epic description mentions lazy-loading each method's content by route (so Beginner doesn't pull in all 119 CFOP records) — not done, `src/data/methods/index.ts` combines `allCases` eagerly. Never broken into a concrete ticket; not urgent at current bundle size (Three.js dominates the bundle, not case data).
 
 Epics 3 (Roux) and 4 (ZZ) stay parked on purpose.
