@@ -1,6 +1,7 @@
 import type { AlgorithmCase } from '../types'
 import { beginnerCases } from './beginner'
 import { cfopCases } from './cfop'
+import { rouxCases } from './roux'
 
 export {
   adjacentSteps,
@@ -11,7 +12,7 @@ export {
   stepById,
 } from './catalog'
 
-export const allCases: AlgorithmCase[] = [...beginnerCases, ...cfopCases]
+export const allCases: AlgorithmCase[] = [...beginnerCases, ...cfopCases, ...rouxCases]
 
 export const casesById: Record<string, AlgorithmCase> = Object.fromEntries(
   allCases.map((cubeCase) => [cubeCase.id, cubeCase]),

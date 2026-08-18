@@ -1,8 +1,9 @@
 import type { LessonStep, Method } from '../types'
 import { beginnerMethod } from './beginner'
 import { cfopMethod } from './cfop/method'
+import { rouxMethod } from './roux/method'
 
-export const methods: Method[] = [beginnerMethod, cfopMethod]
+export const methods: Method[] = [beginnerMethod, cfopMethod, rouxMethod]
 
 export const methodsById: Record<string, Method> = Object.fromEntries(methods.map((method) => [method.id, method]))
 
