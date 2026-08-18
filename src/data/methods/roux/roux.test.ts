@@ -3,9 +3,9 @@ import { rouxCmllCases } from './cmll'
 import { rouxCases } from './index'
 
 describe('Roux library sizes', () => {
-  it('has 42 CMLL cases plus 6 block-building examples', () => {
+  it('has 42 CMLL cases plus block-building and LSE examples', () => {
     expect(rouxCmllCases).toHaveLength(42)
-    expect(rouxCases.length).toBe(3 + 3 + 42)
+    expect(rouxCases.length).toBe(3 + 3 + 42 + 3 + 3 + 3)
   })
 
   it('numbers CMLL 1-42 without gaps', () => {

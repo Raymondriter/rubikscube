@@ -1,5 +1,12 @@
 import type { LessonStep, Method } from '../../types'
-import { rouxCmllIds, rouxFirstBlockIds, rouxSecondBlockIds } from './ids'
+import {
+  rouxCmllIds,
+  rouxFirstBlockIds,
+  rouxLseEdgesIds,
+  rouxLseEoIds,
+  rouxLseL6eIds,
+  rouxSecondBlockIds,
+} from './ids'
 
 const steps: LessonStep[] = [
   {
@@ -53,6 +60,43 @@ Same two shapes as before (free pair, split pair), just aimed at the right side.
 Cases are grouped by corner-permutation family: **O** (already permuted, 2 cases), **H**, **Pi**, **U**, **T**, **L** — each with an even split of solved/swapped column patterns — then **Sune** and **Anti-Sune**, the two you already half-know from 2-look OLL.
 
 Learn Sune/Anti-Sune first (you already recognize the shape), then O (only 2 cases), then the rest by family. Full CMLL is 42 algorithms total — a third of CFOP's 119, concentrated entirely in this one step.`,
+  },
+  {
+    id: 'roux-lse-eo',
+    method: 'roux',
+    title: 'LSE · edge orientation',
+    practiceMode: 'guided',
+    xpReward: 20,
+    demoCaseIds: [...rouxLseEoIds],
+    bodyMd: `Six edges are left: the 4 on U, plus DF and DB (the two D-layer edges neither block touched). From here on, **only M and U moves** — that's the whole point of Roux's last step being fast to execute.
+
+An edge is "oriented" if it can be solved with just L, R, U, D, F2, B2 — no quarter-turn F/B needed. You're always some even number of edges away from all-oriented (0, 2, 4, or 6 flipped), and there's really only one move to learn: the **arrow trigger**, \`M' U2 M\` — it flips the two edges currently in the M-slice.
+
+Don't memorize a case table for this one either. Count how many edges look flipped, reposition with \`U\` moves so two flipped edges land in the M-slice (that's the "arrow"), fire the trigger, recount, repeat.`,
+  },
+  {
+    id: 'roux-lse-edges',
+    method: 'roux',
+    title: 'LSE · UL/UR edges',
+    practiceMode: 'guided',
+    xpReward: 20,
+    demoCaseIds: [...rouxLseEdgesIds],
+    bodyMd: `With all six edges oriented, place the two that belong in **UL** and **UR** without breaking that orientation — still M/U only.
+
+Get both target edges down to D, angle the cube so a plain \`M2\` drops them straight into UL/UR. If only one is in place, a quarter \`U\` and a re-angle usually sets up the other without disturbing the first.`,
+  },
+  {
+    id: 'roux-lse-l6e',
+    method: 'roux',
+    title: 'LSE · finish',
+    practiceMode: 'guided',
+    xpReward: 20,
+    demoCaseIds: [...rouxLseL6eIds],
+    bodyMd: `Four edges left — DF, DB, and the M-slice pair — and the cube solves itself once they're placed. Still M/U only: no new moves, just more of the same \`M2\`/\`U\` pattern from the last step, applied intuitively rather than memorized.
+
+If the two white (D-layer) edges need to swap simultaneously, \`M2 U2 M2 U2\` does both at once — the only "trick" worth remembering here. Everything else is: reposition with \`U\`, fire \`M2\`, recheck, repeat until solved.
+
+This is intentionally kept intuitive rather than a full algorithm table — that matches how Roux is actually taught (see \`AGENTS.md\`). A dedicated EOLR/full-L6E case set is a reasonable later addition if you want to push execution speed further.`,
   },
 ]
 

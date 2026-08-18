@@ -1,7 +1,15 @@
 import type { AlgorithmCase } from '../../types'
 import { rouxFirstBlockCases, rouxSecondBlockCases } from './blocks'
 import { rouxCmllCases } from './cmll'
+import { rouxLseEdgesCases, rouxLseEoCases, rouxLseL6eCases } from './lse'
 
 export { rouxMethod } from './method'
 
-export const rouxCases: AlgorithmCase[] = [...rouxFirstBlockCases, ...rouxSecondBlockCases, ...rouxCmllCases]
+export const rouxCases: AlgorithmCase[] = [
+  ...rouxFirstBlockCases,
+  ...rouxSecondBlockCases,
+  ...rouxCmllCases,
+  ...rouxLseEoCases,
+  ...rouxLseEdgesCases,
+  ...rouxLseL6eCases,
+]
