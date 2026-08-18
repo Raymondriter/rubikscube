@@ -16,7 +16,7 @@ function pll(
     group,
     solution,
     yellowOnU: true,
-    recognitionHighlight: ['UF', 'UR', 'UB', 'UL', 'UFR', 'UBR', 'UBL', 'UFL'],
+    recognitionHighlight: ['UF', 'UR', 'UB', 'UL', 'URF', 'URB', 'ULB', 'ULF'],
     tags: ['cfop', 'pll', ...tags],
   })
 }

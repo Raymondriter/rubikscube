@@ -10,7 +10,7 @@ function f2l(n: number, name: string, group: string, solution: string): Algorith
     group,
     solution,
     yellowOnU: true,
-    recognitionHighlight: ['UFR', 'FR'],
+    recognitionHighlight: ['URF', 'FR'],
     tags: ['cfop', 'f2l', group],
   })
 }

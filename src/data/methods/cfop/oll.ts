@@ -10,7 +10,7 @@ function oll(n: number, name: string, group: string, solution: string): Algorith
     group,
     solution,
     yellowOnU: true,
-    recognitionHighlight: ['U', 'UF', 'UR', 'UB', 'UL', 'UFR', 'UBR', 'UBL', 'UFL'],
+    recognitionHighlight: ['U', 'UF', 'UR', 'UB', 'UL', 'URF', 'URB', 'ULB', 'ULF'],
     tags: ['cfop', 'oll', group],
   })
 }
