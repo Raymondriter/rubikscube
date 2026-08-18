@@ -1,5 +1,5 @@
 import type { LessonStep, Method } from '../../types'
-import { rouxFirstBlockIds, rouxSecondBlockIds } from './ids'
+import { rouxCmllIds, rouxFirstBlockIds, rouxSecondBlockIds } from './ids'
 
 const steps: LessonStep[] = [
   {
@@ -40,6 +40,19 @@ A good first block takes about 8 moves. The examples below show a couple of typi
     bodyMd: `Mirror the first block on the **right**, without disturbing what's already solved on the left. This is the harder of the two blocks — every insertion has to route around a block that's already in the way.
 
 Same two shapes as before (free pair, split pair), just aimed at the right side. If a piece you need turns out to be buried inside the first block, that's a planning problem to avoid during inspection, not something to fix mid-solve — once this feels natural, start planning both blocks together before you turn a single move.`,
+  },
+  {
+    id: 'roux-cmll',
+    method: 'roux',
+    title: 'CMLL · 42 cases',
+    practiceMode: 'quiz',
+    xpReward: 50,
+    demoCaseIds: [...rouxCmllIds],
+    bodyMd: `With both blocks done, 8 pieces are left: the last layer's 4 corners and the 6 edges outside the blocks (the last two are placeholder-solved by the blocks themselves for now). CMLL orients **and** permutes all 4 corners in one algorithm — the M-slice doesn't matter yet, so recognition is just the 4 side stickers around the top layer, same as PLL corners.
+
+Cases are grouped by corner-permutation family: **O** (already permuted, 2 cases), **H**, **Pi**, **U**, **T**, **L** — each with an even split of solved/swapped column patterns — then **Sune** and **Anti-Sune**, the two you already half-know from 2-look OLL.
+
+Learn Sune/Anti-Sune first (you already recognize the shape), then O (only 2 cases), then the rest by family. Full CMLL is 42 algorithms total — a third of CFOP's 119, concentrated entirely in this one step.`,
   },
 ]
 
