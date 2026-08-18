@@ -4,8 +4,10 @@ import { AppShell } from './components/layout/AppShell'
 import { HomePage } from './pages/HomePage'
 import { MethodPage } from './pages/MethodPage'
 import { NotFoundPage } from './pages/NotFoundPage'
-import { TrainerHomePage } from './pages/TrainerHomePage'
 
+const TrainerHomePage = lazy(() =>
+  import('./pages/TrainerHomePage').then((module) => ({ default: module.TrainerHomePage })),
+)
 const CaseBrowserPage = lazy(() =>
   import('./pages/CaseBrowserPage').then((module) => ({ default: module.CaseBrowserPage })),
 )
@@ -59,7 +61,14 @@ const router = createBrowserRouter([
           </Suspense>
         ),
       },
-      { path: 'train', element: <TrainerHomePage /> },
+      {
+        path: 'train',
+        element: (
+          <Suspense fallback={<PageFallback />}>
+            <TrainerHomePage />
+          </Suspense>
+        ),
+      },
       {
         path: 'train/:setId/stats',
         element: (
