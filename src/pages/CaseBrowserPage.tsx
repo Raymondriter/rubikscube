@@ -25,6 +25,7 @@ export function CaseBrowserPage() {
     'cmll',
     'eo',
     'l6e',
+    'eolr',
     'ocll',
     'eoline',
   ]

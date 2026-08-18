@@ -5,7 +5,7 @@ import {
   cfopPllIds,
   cfopPllTwoLookIds,
 } from './methods/cfop/ids'
-import { rouxCmllIds } from './methods/roux/ids'
+import { rouxCmllIds, rouxEolrIds } from './methods/roux/ids'
 import { zzOcllIds, zzPllIds } from './methods/zz/ids'
 
 export const beginnerLastLayerIds = [
@@ -80,6 +80,12 @@ export const trainerSets: TrainerSet[] = [
     name: 'ZZ PLL',
     summary: 'The same 21 permutations as CFOP, drilled from the ZZ track.',
     caseIds: [...zzPllIds],
+  },
+  {
+    id: 'roux-eolr',
+    name: 'EOLR',
+    summary: 'All 47 Roux edge-orientation-and-placement cases, grouped by family.',
+    caseIds: [...rouxEolrIds],
   },
 ]
 
