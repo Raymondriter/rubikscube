@@ -29,17 +29,65 @@ const STICKER_LETTER: Record<StickerColor, string> = {
   green: 'G',
 }
 
-const BODY_HEX = 0x0d0d12
 const COLORS = Object.keys(STICKER_HEX) as StickerColor[]
+
+/**
+ * Cosmetic-only: a skin varies body color and material finish (roughness/metalness), never
+ * sticker hue - sticker color always comes from STICKER_HEX/COLORBLIND_HEX above, so which
+ * physical color a face is stays identical (and colorblind-safe) no matter the skin.
+ */
+export interface CubeSkinDefinition {
+  id: string
+  name: string
+  body: { color: number; roughness: number; metalness: number }
+  sticker: { roughness: number; metalness: number }
+}
+
+export const CUBE_SKINS: CubeSkinDefinition[] = [
+  {
+    id: 'classic',
+    name: 'Classic',
+    body: { color: 0x0d0d12, roughness: 0.45, metalness: 0.15 },
+    sticker: { roughness: 0.2, metalness: 0 },
+  },
+  {
+    id: 'stealth',
+    name: 'Stealth',
+    body: { color: 0x050505, roughness: 0.75, metalness: 0.05 },
+    sticker: { roughness: 0.55, metalness: 0 },
+  },
+  {
+    id: 'chrome',
+    name: 'Chrome',
+    body: { color: 0xe4e6eb, roughness: 0.15, metalness: 0.85 },
+    sticker: { roughness: 0.08, metalness: 0.35 },
+  },
+  {
+    id: 'sunset',
+    name: 'Sunset',
+    body: { color: 0x2a120a, roughness: 0.3, metalness: 0.35 },
+    sticker: { roughness: 0.12, metalness: 0.1 },
+  },
+]
+
+export const DEFAULT_SKIN_ID = CUBE_SKINS[0].id
 
 let bodyMaterial: THREE.MeshStandardMaterial | null = null
 const stickerMaterials = new Map<StickerColor, THREE.MeshStandardMaterial>()
 const letterTextures = new Map<StickerColor, THREE.CanvasTexture>()
 let colorblindEnabled = false
+let currentSkinId = DEFAULT_SKIN_ID
+
+function currentSkin(): CubeSkinDefinition {
+  return CUBE_SKINS.find((skin) => skin.id === currentSkinId) ?? CUBE_SKINS[0]
+}
 
 /** Shared body material - one instance reused across every cubie. */
 export function getBodyMaterial(): THREE.MeshStandardMaterial {
-  bodyMaterial ??= new THREE.MeshStandardMaterial({ color: BODY_HEX, roughness: 0.45, metalness: 0.15 })
+  if (!bodyMaterial) {
+    const { color, roughness, metalness } = currentSkin().body
+    bodyMaterial = new THREE.MeshStandardMaterial({ color, roughness, metalness })
+  }
   return bodyMaterial
 }
 
@@ -68,15 +116,37 @@ function letterTexture(color: StickerColor): THREE.CanvasTexture {
 export function getStickerMaterial(color: StickerColor): THREE.MeshStandardMaterial {
   let material = stickerMaterials.get(color)
   if (!material) {
+    const { roughness, metalness } = currentSkin().sticker
     material = new THREE.MeshStandardMaterial({
       color: (colorblindEnabled ? COLORBLIND_HEX : STICKER_HEX)[color],
-      roughness: 0.2,
-      metalness: 0,
+      roughness,
+      metalness,
       map: colorblindEnabled ? letterTexture(color) : null,
     })
     stickerMaterials.set(color, material)
   }
   return material
+}
+
+/** Swaps body/sticker material finish to the given skin - never touches sticker hue, so this stays colorblind-safe by construction. Unknown ids fall back to the default skin. */
+export function setCubeSkin(id: string): void {
+  currentSkinId = CUBE_SKINS.some((skin) => skin.id === id) ? id : DEFAULT_SKIN_ID
+  const skin = currentSkin()
+  if (bodyMaterial) {
+    bodyMaterial.color.setHex(skin.body.color)
+    bodyMaterial.roughness = skin.body.roughness
+    bodyMaterial.metalness = skin.body.metalness
+    bodyMaterial.needsUpdate = true
+  }
+  for (const material of stickerMaterials.values()) {
+    material.roughness = skin.sticker.roughness
+    material.metalness = skin.sticker.metalness
+    material.needsUpdate = true
+  }
+}
+
+export function getCubeSkinId(): string {
+  return currentSkinId
 }
 
 const letterOverlayMaterials = new Map<StickerColor, THREE.MeshBasicMaterial>()
