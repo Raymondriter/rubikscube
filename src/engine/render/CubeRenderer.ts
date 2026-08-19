@@ -388,6 +388,20 @@ export class CubeRenderer {
     return this.interactionAffected
   }
 
+  /**
+   * Adds any cubies in `layers` that are not already on the pivot. Used when
+   * a live drag smears onto a neighbouring layer (wide / rotation) so the
+   * extra slice joins the turn already in progress.
+   */
+  expandInteractiveTwist(move: Pick<MoveSpec, 'axis' | 'layers'>): void {
+    const extra = cubiesInMove(this.cubies, { ...move, quarterTurns: 1 })
+    for (const cubie of extra) {
+      if (this.interactionAffected.includes(cubie)) continue
+      this.pivot.add(cubie.object)
+      this.interactionAffected.push(cubie)
+    }
+  }
+
   setInteractiveTwistAngle(axis: MoveSpec['axis'], angleRadians: number): void {
     this.pivot.quaternion.setFromAxisAngle(AXIS_VECTORS[axis], angleRadians)
   }

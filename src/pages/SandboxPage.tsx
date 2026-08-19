@@ -95,7 +95,7 @@ export function SandboxPage() {
       <header className="text-center">
         <h1 className="text-3xl font-semibold tracking-tight text-white">Sandbox</h1>
         <p className="mt-1 text-sm text-white/50">
-          Scramble, then Space to start the clock. Drag a face or use the keypad.
+          Scramble, then Space to start the clock. Drag a layer — smear onto the next one for a wide or whole-cube turn — or use the keypad.
           <span className="pointer-coarse:hidden"> Arrow keys orbit.</span>
         </p>
       </header>

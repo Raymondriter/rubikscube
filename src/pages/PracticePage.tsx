@@ -92,7 +92,7 @@ export function PracticePage() {
         <h1 className="mt-2 text-3xl font-semibold tracking-tight text-white">Practice</h1>
         <p className="mt-1 text-sm text-white/50">
           {hideName
-            ? 'Recognize the case and solve it. Drag a face or use the keypad.'
+            ? 'Recognize the case and solve it. Drag a layer, or use the keypad.'
             : 'Solve this case with the algorithm you just learned — or find your own way.'}
         </p>
       </div>

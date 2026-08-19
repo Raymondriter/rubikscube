@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import type { CubeRenderer } from './CubeRenderer'
 import type { Axis, Coord, MoveSpec } from '../types'
+import { asCoord, expandLayers, layersForDrag } from './dragLayers'
 
 const DRAG_COMMIT_THRESHOLD_PX = 8
 const SNAP_BACK_FRACTION = 0.5 // drags under half a quarter-turn cancel back to the pre-drag state
@@ -32,9 +33,11 @@ interface PendingDrag {
  * Owns raycasting and gesture disambiguation: a plain click-drag on empty
  * space (or on the cube while it's busy) orbits the camera; a drag that
  * starts on a cubie face and crosses a small pixel threshold becomes a layer
- * twist. CubeRenderer owns the actual scene-graph mechanics (the pivot) -
- * this class only ever calls its small imperative API, so there's exactly
- * one place that can touch cubie transforms.
+ * twist. Smearing onto a neighbouring layer mid-drag grows the turn into a
+ * wide move or a whole-cube rotation. CubeRenderer owns the actual
+ * scene-graph mechanics (the pivot) - this class only ever calls its small
+ * imperative API, so there's exactly one place that can touch cubie
+ * transforms.
  */
 export class CubeInteraction {
   private readonly renderer: CubeRenderer
@@ -127,6 +130,7 @@ export class CubeInteraction {
   private readonly onPointerMove = (event: PointerEvent): void => {
     if (this.committed && event.pointerId === this.committed.pointerId) {
       const d = this.committed
+      this.growCommittedLayers(event)
       const dx = event.clientX - d.startX
       const dy = event.clientY - d.startY
       this.renderer.setInteractiveTwistAngle(d.axis, this.signedAngle(d, dx, dy))
@@ -135,7 +139,7 @@ export class CubeInteraction {
     if (this.pending && event.pointerId === this.pending.pointerId) {
       const dx = event.clientX - this.pending.startX
       const dy = event.clientY - this.pending.startY
-      if (Math.hypot(dx, dy) >= DRAG_COMMIT_THRESHOLD_PX) this.commitTwistGesture(dx, dy)
+      if (Math.hypot(dx, dy) >= DRAG_COMMIT_THRESHOLD_PX) this.commitTwistGesture(event, dx, dy)
     }
   }
 
@@ -167,7 +171,7 @@ export class CubeInteraction {
    * mirrors), then locks the gesture in for the rest of the drag - it never
    * re-evaluates axis choice mid-gesture even if the pointer wanders.
    */
-  private commitTwistGesture(dx: number, dy: number): void {
+  private commitTwistGesture(event: PointerEvent, dx: number, dy: number): void {
     if (!this.pending) return
     const normal = this.pending.faceNormal
 
@@ -197,16 +201,63 @@ export class CubeInteraction {
     const axis = dominantAxis(rotationAxisVec)
     if (!axis) return
     const sign = Math.sign(rotationAxisVec[axis]) as 1 | -1
-    const layer = Math.round(this.pending.cubieWorldPos[axis]) as Coord
+    const startLayer = asCoord(this.pending.cubieWorldPos[axis])
+    if (startLayer === null) return
+    const endLayer = this.layerAtPointer(event, axis) ?? startLayer
+    const layers = layersForDrag({
+      start: startLayer,
+      end: endLayer,
+      shiftKey: event.shiftKey,
+      rotateKey: event.ctrlKey || event.metaKey,
+    })
 
     const pointerId = this.pending.pointerId
     const startX = this.pending.startX
     const startY = this.pending.startY
     this.pending = null
-    this.committed = { pointerId, startX, startY, axis, layers: [layer], screenDir: bestScreenDir, sign }
+    this.committed = { pointerId, startX, startY, axis, layers, screenDir: bestScreenDir, sign }
 
     this.renderer.orbitControls.enabled = false
-    this.renderer.beginInteractiveTwist({ axis, layers: [layer] })
+    this.renderer.beginInteractiveTwist({ axis, layers })
+  }
+
+  /**
+   * A drag starts as a single layer (or whatever the modifier asked for). If
+   * the pointer then crosses onto another layer along the locked axis, that
+   * layer joins the turn — smear onto the equator for a wide move, all the
+   * way across for a rotation.
+   */
+  private growCommittedLayers(event: PointerEvent): void {
+    const drag = this.committed
+    if (!drag) return
+    if (event.ctrlKey || event.metaKey) {
+      const all: Coord[] = [-1, 0, 1]
+      if (drag.layers.length < 3) {
+        drag.layers = all
+        this.renderer.expandInteractiveTwist({ axis: drag.axis, layers: all })
+      }
+      return
+    }
+    if (event.shiftKey && drag.layers.length === 1 && drag.layers[0] !== 0) {
+      const next = expandLayers(drag.layers, 0)
+      drag.layers = next
+      this.renderer.expandInteractiveTwist({ axis: drag.axis, layers: next })
+    }
+    const layer = this.layerAtPointer(event, drag.axis)
+    if (layer === null) return
+    const next = expandLayers(drag.layers, layer)
+    if (next.length === drag.layers.length) return
+    drag.layers = next
+    this.renderer.expandInteractiveTwist({ axis: drag.axis, layers: next })
+  }
+
+  private layerAtPointer(event: PointerEvent, axis: Axis): Coord | null {
+    const ndc = this.toNdc(event)
+    this.raycaster.setFromCamera(ndc, this.renderer.cameraInstance)
+    const hit = this.raycaster.intersectObjects(this.renderer.rootGroup.children, true)[0]
+    if (!hit?.object.parent) return null
+    const world = hit.object.parent.getWorldPosition(new THREE.Vector3())
+    return asCoord(world[axis])
   }
 
   private worldDirectionToScreen(worldDir: THREE.Vector3): THREE.Vector2 {
