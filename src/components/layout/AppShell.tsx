@@ -1,10 +1,14 @@
 import { Link, NavLink, Outlet } from 'react-router-dom'
+import { isPortfolioBuild, portfolioLabsHref } from '../../portfolio'
 import { useProgressStore } from '../../state/progressStore'
 import { Onboarding } from '../onboarding/Onboarding'
 import { XpBar } from '../progress/XpBar'
 
+// Tighter horizontal padding under `sm`: the nav is the widest thing in the
+// header, and at 375px the row has no slack left once the portfolio edition
+// adds its Labs backlink - without this the level badge is pushed off-screen.
 const navClass = ({ isActive }: { isActive: boolean }) =>
-  `rounded-full px-3 py-1.5 text-sm transition ${
+  `rounded-full px-2 py-1.5 text-sm transition sm:px-3 ${
     isActive ? 'bg-white/10 text-white' : 'text-white/55 hover:text-white'
   }`
 
@@ -23,11 +27,30 @@ export function AppShell() {
       />
 
       <header className="sticky top-0 z-20 border-b border-white/5 bg-ink-950/80 backdrop-blur-md">
-        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-4 px-4">
-          <Link to="/" className="flex items-center gap-2 font-semibold tracking-tight text-white">
-            <span className="grid h-7 w-7 place-items-center rounded-lg bg-brand-500 text-xs font-bold">3×3</span>
-            Twist
-          </Link>
+        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-2 px-4 sm:gap-4">
+          <div className="flex items-center gap-2">
+            {isPortfolioBuild && (
+              // A real document link, not a route: it leaves the lab for the
+              // site hosting it. Label collapses to the arrow on small screens
+              // so it never crowds the nav.
+              <a
+                href={portfolioLabsHref}
+                aria-label="Back to Raymond Riter's labs"
+                title="Back to Raymond Riter's labs"
+                className="rounded-full border border-white/10 px-2 py-1 text-xs text-white/50 transition hover:border-white/25 hover:text-white"
+              >
+                <span aria-hidden="true">←</span>
+                <span aria-hidden="true" className="hidden sm:inline"> Labs</span>
+              </a>
+            )}
+            <Link to="/" className="flex items-center gap-2 font-semibold tracking-tight text-white">
+              <span className="grid h-7 w-7 place-items-center rounded-lg bg-brand-500 text-xs font-bold">3×3</span>
+              {/* The portfolio edition spends this row's remaining width on the
+                  Labs backlink, so below `sm` the badge carries the identity on
+                  its own. Standalone has the room and keeps the wordmark. */}
+              <span className={isPortfolioBuild ? 'hidden sm:inline' : undefined}>Twist</span>
+            </Link>
+          </div>
           <nav className="flex items-center gap-1">
             <NavLink to="/" end className={navClass}>
               Learn

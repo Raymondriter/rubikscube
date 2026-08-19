@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react'
-import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { createBrowserRouter, createHashRouter, RouterProvider } from 'react-router-dom'
+import { isPortfolioBuild } from './portfolio'
 import { AppShell } from './components/layout/AppShell'
 import { HomePage } from './pages/HomePage'
 import { MethodPage } from './pages/MethodPage'
@@ -31,7 +32,7 @@ function PageFallback() {
   return <p className="py-16 text-center text-sm text-white/40">Loading…</p>
 }
 
-const router = createBrowserRouter([
+const routes = [
   {
     path: '/',
     element: <AppShell />,
@@ -113,7 +114,12 @@ const router = createBrowserRouter([
       { path: '*', element: <NotFoundPage /> },
     ],
   },
-])
+]
+
+// The portfolio edition is served from a static mount with one exact rewrite,
+// so its deep links have to live in the hash to survive a reload. Standalone
+// keeps real paths - its host rewrites every path to index.html.
+const router = isPortfolioBuild ? createHashRouter(routes) : createBrowserRouter(routes)
 
 export default function App() {
   return <RouterProvider router={router} />
