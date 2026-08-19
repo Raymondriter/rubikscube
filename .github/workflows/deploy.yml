@@ -4,6 +4,12 @@ on:
   push:
     branches: [master]
 
+# A second push while the first is still deploying would otherwise race it to
+# production, and the loser could be the newer commit.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
 jobs:
   production:
     runs-on: ubuntu-latest
@@ -15,5 +21,19 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
+      - run: npm ci
+
+      # Gate the deploy on the suite, because the thing it protects is the
+      # algorithm data: `cases.test.ts` asserts that every case's setup plus its
+      # taught algorithm returns a solved cube. A typo there teaches someone the
+      # wrong move and looks completely fine in a build.
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+
+      # Version pinned rather than @latest so a CLI release can't change what
+      # this step does without a commit saying so - the first run of this
+      # workflow failed on exactly that.
       - name: Deploy to Vercel
-        run: npx vercel@latest deploy --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
+        run: npx --yes vercel@59.1.4 deploy --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
