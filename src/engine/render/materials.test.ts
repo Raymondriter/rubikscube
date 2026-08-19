@@ -5,6 +5,7 @@ import {
   getBodyMaterial,
   getCubeSkinId,
   getStickerMaterial,
+  setColorblindStickers,
   setCubeSkin,
 } from './materials'
 
@@ -45,5 +46,23 @@ describe('cube skins', () => {
   it('falls back to the default skin for an unknown id', () => {
     setCubeSkin('not-a-real-skin')
     expect(getCubeSkinId()).toBe(DEFAULT_SKIN_ID)
+  })
+})
+
+describe('colorblind stickers', () => {
+  // Regression: the sticker material used to sample the letter canvas as its
+  // `map`. A map multiplies against `color`, and that canvas is transparent
+  // (rgb 0,0,0) everywhere outside the glyph - so every sticker rendered black
+  // and stayed black after toggling the setting off, because the cached
+  // material's map was never cleared. Letters come from the overlay meshes.
+  it('keeps the sticker material free of a texture map in either mode', () => {
+    setColorblindStickers(true)
+    const sticker = getStickerMaterial('blue')
+    expect(sticker.map).toBeNull()
+    expect(sticker.color.getHex()).toBe(0x0072b2)
+
+    setColorblindStickers(false)
+    expect(sticker.map).toBeNull()
+    expect(sticker.color.getHex()).toBe(0x2e6bff)
   })
 })

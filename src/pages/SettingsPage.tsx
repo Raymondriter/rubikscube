@@ -19,44 +19,68 @@ export function SettingsPage() {
       <ul className="mt-8 space-y-4 text-sm text-white/80">
         <li className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
           <div>
-            <p className="font-medium text-white">Colorblind stickers</p>
-            <p className="text-xs text-white/45">High-contrast colors plus W/Y/R/O/B/G letters.</p>
+            <label className="block font-medium text-white" htmlFor="colorblind">
+              Colorblind stickers
+            </label>
+            <p className="text-xs text-white/45" id="colorblind-hint">
+              High-contrast colors plus W/Y/R/O/B/G letters.
+            </p>
           </div>
           <input
+            id="colorblind"
             type="checkbox"
+            aria-describedby="colorblind-hint"
             checked={settings.colorblind ?? false}
             onChange={(event) => setColorblind(event.target.checked)}
           />
         </li>
         <li className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
           <div>
-            <p className="font-medium text-white">Sound</p>
-            <p className="text-xs text-white/45">A soft click on twists, a chime when you solve.</p>
+            <label className="block font-medium text-white" htmlFor="sound">
+              Sound
+            </label>
+            <p className="text-xs text-white/45" id="sound-hint">
+              A soft click on twists, a chime when you solve.
+            </p>
           </div>
           <input
+            id="sound"
             type="checkbox"
+            aria-describedby="sound-hint"
             checked={settings.sound ?? true}
             onChange={(event) => setSound(event.target.checked)}
           />
         </li>
         <li className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
           <div>
-            <p className="font-medium text-white">Reduce demo motion</p>
-            <p className="text-xs text-white/45">Lesson Play applies the algorithm instantly.</p>
+            <label className="block font-medium text-white" htmlFor="reduce-motion">
+              Reduce demo motion
+            </label>
+            <p className="text-xs text-white/45" id="reduce-motion-hint">
+              Lesson Play applies the algorithm instantly.
+            </p>
           </div>
           <input
+            id="reduce-motion"
             type="checkbox"
+            aria-describedby="reduce-motion-hint"
             checked={settings.reducedMotion ?? false}
             onChange={(event) => setReducedMotion(event.target.checked)}
           />
         </li>
         <li className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
           <div>
-            <p className="font-medium text-white">Random AUF in trainer execute</p>
-            <p className="text-xs text-white/45">Last-layer cases get a random U turn. Align, then do the alg.</p>
+            <label className="block font-medium text-white" htmlFor="auf-execute">
+              Random AUF in trainer execute
+            </label>
+            <p className="text-xs text-white/45" id="auf-execute-hint">
+              Last-layer cases get a random U turn. Align, then do the alg.
+            </p>
           </div>
           <input
+            id="auf-execute"
             type="checkbox"
+            aria-describedby="auf-execute-hint"
             checked={settings.aufExecute ?? true}
             onChange={(event) => setAufExecute(event.target.checked)}
           />

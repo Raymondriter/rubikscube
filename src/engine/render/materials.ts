@@ -117,11 +117,15 @@ export function getStickerMaterial(color: StickerColor): THREE.MeshStandardMater
   let material = stickerMaterials.get(color)
   if (!material) {
     const { roughness, metalness } = currentSkin().sticker
+    // No `map` here on purpose. A texture multiplies against `color`, and the
+    // letter canvas is transparent outside the glyph - so sampling it turns
+    // every sticker black rather than tinting it. Letters are drawn by the
+    // separate overlay meshes (getLetterOverlayMaterial), which are transparent
+    // and toggled with CubeRenderer.setLetterOverlaysVisible.
     material = new THREE.MeshStandardMaterial({
       color: (colorblindEnabled ? COLORBLIND_HEX : STICKER_HEX)[color],
       roughness,
       metalness,
-      map: colorblindEnabled ? letterTexture(color) : null,
     })
     stickerMaterials.set(color, material)
   }
