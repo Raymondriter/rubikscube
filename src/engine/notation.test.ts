@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { inverseAlgorithm, inverseMove, invertAlgorithmString, parseAlgorithm, parseMove } from './notation'
+import {
+  inverseAlgorithm,
+  inverseMove,
+  invertAlgorithmString,
+  isExtendedToken,
+  parseAlgorithm,
+  parseMove,
+  usesExtendedMoves,
+} from './notation'
 
 describe('parseMove', () => {
   it('parses basic face turns with correct axis/layer', () => {
@@ -79,5 +87,31 @@ describe('invertAlgorithmString', () => {
     expect(invertAlgorithmString("R U R' U'")).toBe("U R U' R'")
     expect(invertAlgorithmString('F R U R\' U\' F\'')).toBe('F U R U\' R\' F\'')
     expect(invertAlgorithmString('R2 U')).toBe("U' R2")
+  })
+})
+
+describe('extended-move detection', () => {
+  it('treats the six face turns as within reach of the plain keypad', () => {
+    for (const token of ['R', "R'", 'R2', 'U', 'D2', "L'", 'F', 'B2']) {
+      expect(isExtendedToken(token)).toBe(false)
+    }
+  })
+
+  it('flags slices, wide turns, and rotations', () => {
+    for (const token of ['M', "M'", 'M2', 'E', 'S', 'r', "u'", 'd2', 'f', 'l', 'b', 'Rw', "Uw'", 'x', "y'", 'z2']) {
+      expect(isExtendedToken(token)).toBe(true)
+    }
+  })
+
+  it('ignores tokens it cannot parse rather than guessing', () => {
+    expect(isExtendedToken('nonsense')).toBe(false)
+    expect(isExtendedToken('')).toBe(false)
+  })
+
+  it('detects whether a whole algorithm needs more than the six faces', () => {
+    expect(usesExtendedMoves("R U R' U'")).toBe(false)
+    expect(usesExtendedMoves('M2 U M2 U2 M2 U M2')).toBe(true)
+    expect(usesExtendedMoves("r U R' U' r' F R F'")).toBe(true)
+    expect(usesExtendedMoves('')).toBe(false)
   })
 })

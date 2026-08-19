@@ -125,6 +125,7 @@ export function PracticePage() {
 
       <MoveKeypad
         disabled={busy || won}
+        algorithm={hint ? hintAlg : undefined}
         onMove={(token) => {
           cubeRef.current?.enqueueMove(token, 140)
         }}

@@ -79,6 +79,24 @@ export function parseMove(token: string): MoveSpec {
   return { axis, layers, quarterTurns }
 }
 
+/**
+ * True for a token the six face buttons can't produce: a slice (M/E/S), a wide
+ * turn (r/Rw/...), or a whole-cube rotation (x/y/z). The engine has always
+ * parsed these - only the on-screen keypad was limited to face turns - so this
+ * is what tells the UI when it needs to offer more than the plain six.
+ */
+export function isExtendedToken(token: string): boolean {
+  const match = TOKEN_RE.exec(token)
+  if (!match) return false
+  const face = match[1]
+  return face.length === 2 || /^[rludfbMESxyz]$/.test(face)
+}
+
+/** True when any token in the algorithm needs a key beyond the six faces. */
+export function usesExtendedMoves(algorithm: string): boolean {
+  return tokenizeAlgorithm(algorithm).some(isExtendedToken)
+}
+
 /** Splits a whitespace-separated algorithm into Singmaster tokens. */
 export function tokenizeAlgorithm(algorithm: string): string[] {
   return algorithm.trim().split(/\s+/).filter(Boolean)

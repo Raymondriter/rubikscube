@@ -372,6 +372,9 @@ export function TrainerSessionPage() {
           {hint && <p className="font-mono text-sm text-brand-400">{hintAlg}</p>}
           <MoveKeypad
             disabled={busy}
+            // Only once the hint is showing: opening the slice rows earlier
+            // would tell a timed solver the case needs one before they look.
+            algorithm={hint ? hintAlg : undefined}
             onMove={(token) => {
               cubeRef.current?.enqueueMove(token, 120)
             }}

@@ -6,12 +6,14 @@ Interactive 3×3 tutorial: beginner method, then CFOP, Roux, or ZZ, with a live 
 
 ```bash
 npm install
-npm run dev      # http://localhost:5173
+npm run dev              # http://localhost:5173
 npm test
-npm run build
+npm run build            # standalone -> dist/
+npm run build:portfolio  # lab edition -> dist-portfolio/
 ```
 
 Production: https://rubikscube-xi.vercel.app  
+Also published as a lab at https://raymondriter.dev/labs/twist  
 Jira: project `RUBIKSCUBE` at https://rpr2998.atlassian.net
 
 ## Stack
@@ -25,6 +27,16 @@ Vite, React 19, TypeScript, Tailwind 4, Three.js (no R3F), Zustand persist, Reac
 - **Trainer** (`/train`): timed execute + recognition. Stats live in `progress.caseStats`. Weak cases are weighted higher.
 - **Progress**: Zustand persist key `rubikscube-progress`, schema `PROGRESS_VERSION` (currently 7). Bump version and migrate when the snapshot shape changes - zustand persist only runs `migrate()` when the stored version differs from current, so a new settings field with a non-`undefined` default needs the bump or existing users never get it. Settings include colorblind, trainerOrder, onboarded, aufExecute, sound. `timedSolves` holds the last 50 sandbox times. `dailyDrill` is today’s trainer quota (set + reps / 20).
 - **Sound** (`src/engine/sound.ts`): synthesized Web Audio, no external assets. Mirrors `materials.ts`'s pattern - a module-level flag callers push state into (`setSoundEnabled`), not something the module reads from the store itself. Wired into Sandbox/Practice only, not Trainer (deliberate - fast drilling is a different UX register).
+
+## Portfolio edition
+
+`npm run build:portfolio` produces the artifact the portfolio (`../rayportmondfolio`) vendors into `public/labs/twist`; refresh it from there with `node scripts/sync-static-labs.mjs --only twist`, never by copying by hand. Three things differ from the standalone build, all gated on `isPortfolioBuild` in `src/portfolio.ts`:
+
+- **base** is `/labs/twist/`, so no asset resolves at the site root.
+- **`createHashRouter`**, not `createBrowserRouter`. The host allows exactly one exact rewrite per lab (`/labs/twist` -> its `index.html`) and forbids a broad fallback, because that would answer missing-asset requests with HTML. Routing in the hash is what makes deep links survive a reload without one. Do not "fix" this by asking the portfolio for a catch-all rewrite.
+- **A `← Labs` document link** in `AppShell`'s header. The host's validator greps the built bundle for it, so it has to stay a literal `href="/labs"` on a real anchor - a `<Link>` or a computed href would both break the check and fail to leave the app.
+
+The host re-checks all of this in `rayportmondfolio/scripts/validate-static-labs.mjs`; read that file before changing anything above.
 
 ## Conventions
 
@@ -44,6 +56,10 @@ Also shipped: sound design (`RUBIKSCUBE-52` - twist click + solve chime), and a 
 Shipped earlier: lazy routes, trainer (execute/recognize/2-sided PLL), sandbox timer with +2/DNF, daily drill quota (20 reps + today's set), weak-case review and single-case drill (`?case=`). `RUBIKSCUBE-24` (real-device drag-to-twist check) is closed: verified via the iOS Simulator's genuine WebKit touch engine.
 
 Fixed in passing: every 3-letter corner entry in CFOP's `recognitionHighlight` arrays (`oll.ts`/`pll.ts`/`f2l.ts`) used the wrong letter order (`UFR` instead of the engine's canonical `URF`) and silently never matched a cubie - corner recognition highlights had never actually lit up. Fixed to the `slotIdFromCoords` (U/D, then R/L, then F/B) convention; Roux and ZZ's own data were authored with the correct order from the start.
+
+**Fixed during the 2026-08-18 QA sweep** (`RUBIKSCUBE-58`, `-57`): colorblind mode rendered the *entire cube black*, on every page, and stayed black after switching the setting off. `getStickerMaterial` passed the letter canvas as the material's `map`, and a `map` multiplies against `color` - that canvas is transparent (rgb 0,0,0) outside the glyph, so every sticker resolved to black. It also persisted, because `stickerMaterials` is a module-level cache and `setColorblindStickers` only ever updated `color`, never `map`. The `map` was dead weight anyway: letters come from the separate overlay meshes (`getLetterOverlayMaterial` + `setLetterOverlaysVisible`), which is the mechanism that superseded it. Removed, with a regression test in `materials.test.ts`. The repo's own `sandbox-colorblind-letters.png` shows the bug, so it had been live a while - worth remembering that a screenshot committed as a reference is not the same as a screenshot anyone checked. Also fixed: all four Settings checkboxes had no accessible name (no `id`/`<label>`/`aria-label`) while the two `<select>`s beside them were wired correctly.
+
+**Keypad extended moves shipped** (`RUBIKSCUBE-59`): the pad used to stop at the 18 face turns, which left 123 of 276 taught algorithms (45%) impossible to enter (Roux 61/104, CFOP 50/121, ZZ 12/35, beginner 0/16). Slice (M/E/S), wide (r/l/u/d/f/b), and rotation (x/y/z) keys now sit behind a toggle so beginners still open to the same six faces; `usesExtendedMoves()` auto-opens those rows when a hint algorithm needs them. Drag-to-twist is still a single layer - it is not a second way to enter wides/slices.
 
 **Stretch items, all resolved**: three items noted below were researched and closed out.
 
