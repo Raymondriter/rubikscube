@@ -34,6 +34,7 @@ interface ProgressActions {
   setOnboarded: (onboarded: boolean) => void
   setAufExecute: (aufExecute: boolean) => void
   setSound: (sound: boolean) => void
+  setSkinId: (skinId: string) => void
   ensureDailyDrill: () => void
 }
 
@@ -63,6 +64,7 @@ export const useProgressStore = create<ProgressStore>()(
       setAufExecute: (aufExecute) =>
         set((state) => ({ settings: { ...state.settings, aufExecute } satisfies ProgressSettings })),
       setSound: (sound) => set((state) => ({ settings: { ...state.settings, sound } satisfies ProgressSettings })),
+      setSkinId: (skinId) => set((state) => ({ settings: { ...state.settings, skinId } satisfies ProgressSettings })),
       ensureDailyDrill: () => set((state) => ensureDailyDrill(state)),
     }),
     {

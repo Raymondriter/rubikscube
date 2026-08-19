@@ -1,3 +1,4 @@
+import { CUBE_SKINS, DEFAULT_SKIN_ID } from '../engine/render/skins'
 import { useProgressStore } from '../state/progressStore'
 
 export function SettingsPage() {
@@ -9,6 +10,8 @@ export function SettingsPage() {
   const setAufExecute = useProgressStore((state) => state.setAufExecute)
   const setOnboarded = useProgressStore((state) => state.setOnboarded)
   const setSound = useProgressStore((state) => state.setSound)
+  const setSkinId = useProgressStore((state) => state.setSkinId)
+  const skinId = settings.skinId ?? DEFAULT_SKIN_ID
 
   return (
     <div className="mx-auto max-w-xl">
@@ -115,6 +118,49 @@ export function SettingsPage() {
           </select>
         </li>
       </ul>
+
+      {/* Radios rather than a select: this is one choice among a few, and the
+          swatch has to be visible to mean anything. Native inputs give keyboard
+          and screen-reader behaviour for free. */}
+      <fieldset className="mt-4 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+        <legend className="px-1 font-medium text-white">Cube skin</legend>
+        <p className="text-xs text-white/45">
+          Changes the plastic, never the sticker colors - so it stays colorblind-safe.
+        </p>
+        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {CUBE_SKINS.map((skin) => {
+            const active = skin.id === skinId
+            return (
+              <label
+                key={skin.id}
+                // The radio itself is sr-only, so the focus ring has to be moved
+                // onto the label - otherwise keyboard users arrowing through the
+                // swatches get no visible indication of where they are.
+                className={`flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-sm transition has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand-400 has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:ring-offset-ink-950 ${
+                  active
+                    ? 'border-brand-500 bg-brand-500/15 text-white'
+                    : 'border-white/10 text-white/70 hover:border-white/25 hover:text-white'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="cube-skin"
+                  value={skin.id}
+                  checked={active}
+                  onChange={() => setSkinId(skin.id)}
+                  className="sr-only"
+                />
+                <span
+                  aria-hidden="true"
+                  className="h-5 w-5 flex-none rounded-md ring-1 ring-white/20"
+                  style={{ background: skin.swatch }}
+                />
+                {skin.name}
+              </label>
+            )
+          })}
+        </div>
+      </fieldset>
 
       <button
         type="button"

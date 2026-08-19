@@ -1,8 +1,9 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react'
 import { CubeRenderer } from '../../engine/render/CubeRenderer'
 import { CubeInteraction } from '../../engine/render/CubeInteraction'
-import { setColorblindStickers } from '../../engine/render/materials'
+import { setColorblindStickers, setCubeSkin } from '../../engine/render/materials'
 import { setSoundEnabled } from '../../engine/sound'
+import { DEFAULT_SKIN_ID } from '../../engine/render/skins'
 import { useProgressStore } from '../../state/progressStore'
 
 export interface CubeCanvasHandle {
@@ -40,6 +41,7 @@ export const CubeCanvas = forwardRef<CubeCanvasHandle, CubeCanvasProps>(function
 ) {
   const colorblind = useProgressStore((state) => state.settings.colorblind ?? false)
   const sound = useProgressStore((state) => state.settings.sound ?? true)
+  const skinId = useProgressStore((state) => state.settings.skinId ?? DEFAULT_SKIN_ID)
   const containerRef = useRef<HTMLDivElement>(null)
   const rendererRef = useRef<CubeRenderer | null>(null)
   const onSolvedRef = useRef(onSolvedChange)
@@ -56,6 +58,7 @@ export const CubeCanvas = forwardRef<CubeCanvasHandle, CubeCanvasProps>(function
     if (!container) return
 
     setColorblindStickers(useProgressStore.getState().settings.colorblind ?? false)
+    setCubeSkin(useProgressStore.getState().settings.skinId ?? DEFAULT_SKIN_ID)
     const renderer = new CubeRenderer(container)
     const interaction = new CubeInteraction(renderer)
     rendererRef.current = renderer
@@ -91,6 +94,10 @@ export const CubeCanvas = forwardRef<CubeCanvasHandle, CubeCanvasProps>(function
     setColorblindStickers(colorblind)
     rendererRef.current?.setLetterOverlaysVisible(colorblind)
   }, [colorblind])
+
+  useEffect(() => {
+    setCubeSkin(skinId)
+  }, [skinId])
 
   useEffect(() => {
     setSoundEnabled(sound)

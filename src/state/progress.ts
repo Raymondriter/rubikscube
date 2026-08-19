@@ -1,7 +1,8 @@
+import { DEFAULT_SKIN_ID } from '../engine/render/skins'
 import { beginnerMethod } from '../data/methods/beginner'
 import { trainerSets } from '../data/trainerSets'
 
-export const PROGRESS_VERSION = 7
+export const PROGRESS_VERSION = 8
 export const XP_PER_LEVEL = 50
 export const PRACTICE_XP = 20
 export const TRAINER_SOLVE_XP = 5
@@ -20,6 +21,8 @@ export interface ProgressSettings {
   onboarded: boolean
   aufExecute: boolean
   sound: boolean
+  /** Cosmetic only - see engine/render/skins.ts. Never affects sticker color. */
+  skinId: string
 }
 
 export interface CaseStats {
@@ -111,6 +114,7 @@ export const defaultProgress = (): ProgressSnapshot => ({
     onboarded: false,
     aufExecute: true,
     sound: true,
+    skinId: DEFAULT_SKIN_ID,
   },
 })
 

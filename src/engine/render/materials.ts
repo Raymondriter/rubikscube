@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import type { StickerColor } from '../types'
+import { CUBE_SKINS, DEFAULT_SKIN_ID, isKnownSkinId, type CubeSkinDefinition } from './skins'
 
 const STICKER_HEX: Record<StickerColor, number> = {
   white: 0xf5f5f0,
@@ -31,46 +32,10 @@ const STICKER_LETTER: Record<StickerColor, string> = {
 
 const COLORS = Object.keys(STICKER_HEX) as StickerColor[]
 
-/**
- * Cosmetic-only: a skin varies body color and material finish (roughness/metalness), never
- * sticker hue - sticker color always comes from STICKER_HEX/COLORBLIND_HEX above, so which
- * physical color a face is stays identical (and colorblind-safe) no matter the skin.
- */
-export interface CubeSkinDefinition {
-  id: string
-  name: string
-  body: { color: number; roughness: number; metalness: number }
-  sticker: { roughness: number; metalness: number }
-}
-
-export const CUBE_SKINS: CubeSkinDefinition[] = [
-  {
-    id: 'classic',
-    name: 'Classic',
-    body: { color: 0x0d0d12, roughness: 0.45, metalness: 0.15 },
-    sticker: { roughness: 0.2, metalness: 0 },
-  },
-  {
-    id: 'stealth',
-    name: 'Stealth',
-    body: { color: 0x050505, roughness: 0.75, metalness: 0.05 },
-    sticker: { roughness: 0.55, metalness: 0 },
-  },
-  {
-    id: 'chrome',
-    name: 'Chrome',
-    body: { color: 0xe4e6eb, roughness: 0.15, metalness: 0.85 },
-    sticker: { roughness: 0.08, metalness: 0.35 },
-  },
-  {
-    id: 'sunset',
-    name: 'Sunset',
-    body: { color: 0x2a120a, roughness: 0.3, metalness: 0.35 },
-    sticker: { roughness: 0.12, metalness: 0.1 },
-  },
-]
-
-export const DEFAULT_SKIN_ID = CUBE_SKINS[0].id
+// The catalog itself lives in the THREE-free `skins.ts` so the settings UI and
+// the persisted schema can read ids/names without pulling in the Three chunk.
+// Re-exported here because this module was the original home.
+export { CUBE_SKINS, DEFAULT_SKIN_ID, type CubeSkinDefinition } from './skins'
 
 let bodyMaterial: THREE.MeshStandardMaterial | null = null
 const stickerMaterials = new Map<StickerColor, THREE.MeshStandardMaterial>()
@@ -134,7 +99,7 @@ export function getStickerMaterial(color: StickerColor): THREE.MeshStandardMater
 
 /** Swaps body/sticker material finish to the given skin - never touches sticker hue, so this stays colorblind-safe by construction. Unknown ids fall back to the default skin. */
 export function setCubeSkin(id: string): void {
-  currentSkinId = CUBE_SKINS.some((skin) => skin.id === id) ? id : DEFAULT_SKIN_ID
+  currentSkinId = isKnownSkinId(id) ? id : DEFAULT_SKIN_ID
   const skin = currentSkin()
   if (bodyMaterial) {
     bodyMaterial.color.setHex(skin.body.color)

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { CUBE_SKINS, DEFAULT_SKIN_ID, isKnownSkinId } from '../engine/render/skins'
 import { beginnerMethod } from '../data/methods/beginner'
 import { cfopOllTwoLookIds, cfopPllIds, cfopPllTwoLookIds } from '../data/methods/cfop/ids'
 import { beginnerLastLayerIds } from '../data/trainerSets'
@@ -289,5 +290,34 @@ describe('rankWeakCases', () => {
       unseen,
       missed,
     ])
+  })
+})
+
+describe('cube skin setting', () => {
+  it('defaults to a skin that actually exists', () => {
+    expect(isKnownSkinId(defaultProgress().settings.skinId)).toBe(true)
+    expect(defaultProgress().settings.skinId).toBe(DEFAULT_SKIN_ID)
+  })
+
+  it('has unique skin ids and a swatch for every skin', () => {
+    const ids = CUBE_SKINS.map((skin) => skin.id)
+    expect(new Set(ids).size).toBe(ids.length)
+    for (const skin of CUBE_SKINS) {
+      expect(skin.swatch).toMatch(/^#[0-9a-f]{6}$/i)
+      expect(skin.name.length).toBeGreaterThan(0)
+    }
+  })
+
+  // The reason PROGRESS_VERSION had to go to 8. Zustand persist only runs
+  // migrate() when the stored version differs, and migrate() fills new fields
+  // by spreading defaults under the persisted settings - so a v7 snapshot,
+  // which has no skinId at all, only gets one because that spread supplies it.
+  it('supplies skinId when merged under an older snapshot that lacks it', () => {
+    const v7Settings = { ...defaultProgress().settings } as Record<string, unknown>
+    delete v7Settings.skinId
+
+    const merged = { ...defaultProgress().settings, ...v7Settings }
+
+    expect(merged.skinId).toBe(DEFAULT_SKIN_ID)
   })
 })
