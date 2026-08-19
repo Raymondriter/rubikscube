@@ -234,7 +234,14 @@ export class CubeRenderer {
   }
 
   private notifySolvedChange(): void {
-    const solved = this.getIsSolved()
+    // Deliberately the "looks solved" check, not the home-seat one. Rotating
+    // the whole cube to see another face is a normal part of solving, and it
+    // moves every cubie off its home seat without changing a thing about
+    // whether the cube is solved - so `isSolved` would report a finished cube
+    // as scrambled and, in the Sandbox, never stop the timer. This only became
+    // reachable once rotations existed as a gesture and a keypad key; Practice
+    // and the Trainer already judge solves with `getIsColorSolved`.
+    const solved = this.getIsColorSolved()
     if (solved !== this.lastSolved) {
       this.lastSolved = solved
       for (const listener of this.solvedChangeListeners) listener(solved)
