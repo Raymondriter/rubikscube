@@ -12,6 +12,7 @@ import { isColorSolved, isSolved } from '../solvedCheck'
 import { generateScramble } from '../scramble'
 import { parseMove, parseAlgorithm } from '../notation'
 import type { MoveSpec } from '../types'
+import { normalizeQuarterTurns } from './dragLayers'
 import { getCubieBodyGeometry, getLetterPlaneGeometry, getStickerGeometry, LETTER_OFFSET, STICKER_OFFSET } from './geometry'
 import { getBodyMaterial, getLetterOverlayMaterial, getStickerMaterial, isColorblindEnabled } from './materials'
 
@@ -32,7 +33,23 @@ export type BusyChangeListener = (busy: boolean) => void
 interface QueuedMove {
   move: MoveSpec
   durationMs: number
+  /** Single user moves (keypad) can be fast-forwarded by a new swipe; scrambles and algorithm demos can't. */
+  interruptible: boolean
 }
+
+/** A released drag easing from wherever the finger let go to the nearest quarter turn. */
+interface Settle {
+  axis: MoveSpec['axis']
+  layers: MoveSpec['layers']
+  quarterTurns: MoveSpec['quarterTurns'] | 0
+  from: number
+  to: number
+  start: number
+  durationMs: number
+}
+
+const SETTLE_MS_PER_QUARTER_TURN = 200
+const SETTLE_MIN_MS = 70
 
 function easeOutCubic(t: number): number {
   return 1 - (1 - t) ** 3
@@ -60,6 +77,8 @@ export class CubeRenderer {
   private currentQueued: QueuedMove | null = null
   private currentAffected: Cubie[] = []
   private interactionAffected: Cubie[] = []
+  private dragging = false
+  private settle: Settle | null = null
 
   private rafId = 0
   private lastSolved: boolean | null = null
@@ -146,9 +165,37 @@ export class CubeRenderer {
     this.camera.lookAt(this.controls.target)
   }
 
-  /** True while either a queued animation or an interactive drag currently owns the pivot. */
+  /** True while either a queued animation or an interactive drag (live or settling) currently owns the pivot. */
   get isBusy(): boolean {
     return this.isAnimatingQueue || this.interactionAffected.length > 0
+  }
+
+  /**
+   * Whether a new swipe may fast-forward whatever is animating. A user
+   * twisting quickly should never have their next swipe swallowed (or turned
+   * into a camera orbit) just because the previous turn is still easing in -
+   * but a scramble or an algorithm demo is not theirs to cut short.
+   */
+  get canInterrupt(): boolean {
+    if (this.dragging) return false
+    const queued = this.queue.every((entry) => entry.interruptible)
+    if (this.settle) return queued
+    if (this.isAnimatingQueue) return (this.currentQueued?.interruptible ?? false) && queued
+    return true
+  }
+
+  /** Instantly completes a settling drag and any queued user moves. Returns false if something non-interruptible is running. */
+  finishInterruptible(): boolean {
+    if (!this.canInterrupt) return false
+    if (this.settle) this.finishSettle()
+    while (this.isAnimatingQueue && this.currentQueued) this.completeCurrentQueued()
+    return true
+  }
+
+  /** Kills any orbit momentum so the camera holds still while a finger is on the cube. */
+  freezeCamera(): void {
+    const internal = this.controls as unknown as { _sphericalDelta?: THREE.Spherical }
+    internal._sphericalDelta?.set(0, 0, 0)
   }
 
   private buildLights(): void {
@@ -264,14 +311,14 @@ export class CubeRenderer {
 
   enqueueAlgorithm(algorithm: string, durationMs = DEFAULT_MOVE_DURATION_MS): void {
     if (this.isBusy) return
-    for (const move of parseAlgorithm(algorithm)) this.queue.push({ move, durationMs })
+    for (const move of parseAlgorithm(algorithm)) this.queue.push({ move, durationMs, interruptible: false })
     this.processQueue()
     this.notifyBusyChange()
   }
 
   enqueueMove(token: string, durationMs = DEFAULT_MOVE_DURATION_MS): void {
-    if (this.interactionAffected.length > 0) return
-    this.queue.push({ move: parseMove(token), durationMs })
+    if (this.dragging) return
+    this.queue.push({ move: parseMove(token), durationMs, interruptible: true })
     this.processQueue()
     this.notifyBusyChange()
   }
@@ -321,6 +368,8 @@ export class CubeRenderer {
     this.currentQueued = null
     this.currentAffected = []
     this.interactionAffected = []
+    this.dragging = false
+    this.settle = null
     this.releasePivot()
   }
 
@@ -329,7 +378,7 @@ export class CubeRenderer {
     if (this.isBusy) return []
     this.noteInteraction()
     const tokens = generateScramble(length)
-    for (const token of tokens) this.queue.push({ move: parseMove(token), durationMs: SCRAMBLE_MOVE_DURATION_MS })
+    for (const token of tokens) this.queue.push({ move: parseMove(token), durationMs: SCRAMBLE_MOVE_DURATION_MS, interruptible: false })
     this.processQueue()
     this.notifyBusyChange()
     return tokens
@@ -368,18 +417,22 @@ export class CubeRenderer {
     const angle = move.quarterTurns * (Math.PI / 2) * easeOutCubic(t)
     this.pivot.quaternion.setFromAxisAngle(AXIS_VECTORS[move.axis], angle)
 
-    if (t >= 1) {
-      for (const cubie of this.currentAffected) this.root.add(cubie.object)
-      applyMove(this.cubies, move)
-      this.pivot.quaternion.identity()
-      this.isAnimatingQueue = false
-      this.currentQueued = null
-      this.currentAffected = []
-      for (const listener of this.moveDoneListeners) listener()
-      this.notifySolvedChange()
-      this.processQueue()
-      this.notifyBusyChange()
-    }
+    if (t >= 1) this.completeCurrentQueued()
+  }
+
+  private completeCurrentQueued(): void {
+    if (!this.currentQueued) return
+    const { move } = this.currentQueued
+    for (const cubie of this.currentAffected) this.root.add(cubie.object)
+    applyMove(this.cubies, move)
+    this.pivot.quaternion.identity()
+    this.isAnimatingQueue = false
+    this.currentQueued = null
+    this.currentAffected = []
+    for (const listener of this.moveDoneListeners) listener()
+    this.notifySolvedChange()
+    this.processQueue()
+    this.notifyBusyChange()
   }
 
   // --- Interactive (drag) twist - driven by CubeInteraction ---
@@ -389,39 +442,59 @@ export class CubeRenderer {
 
   beginInteractiveTwist(move: Pick<MoveSpec, 'axis' | 'layers'>): Cubie[] {
     this.noteInteraction()
+    this.dragging = true
     this.interactionAffected = cubiesInMove(this.cubies, { ...move, quarterTurns: 1 })
     for (const cubie of this.interactionAffected) this.pivot.add(cubie.object)
     this.notifyBusyChange()
     return this.interactionAffected
   }
 
-  /**
-   * Adds any cubies in `layers` that are not already on the pivot. Used when
-   * a live drag smears onto a neighbouring layer (wide / rotation) so the
-   * extra slice joins the turn already in progress.
-   */
-  expandInteractiveTwist(move: Pick<MoveSpec, 'axis' | 'layers'>): void {
-    const extra = cubiesInMove(this.cubies, { ...move, quarterTurns: 1 })
-    for (const cubie of extra) {
-      if (this.interactionAffected.includes(cubie)) continue
-      this.pivot.add(cubie.object)
-      this.interactionAffected.push(cubie)
-    }
-  }
-
   setInteractiveTwistAngle(axis: MoveSpec['axis'], angleRadians: number): void {
     this.pivot.quaternion.setFromAxisAngle(AXIS_VECTORS[axis], angleRadians)
   }
 
-  /** Ends the drag. `quarterTurns` 0 cancels back to the pre-drag state; otherwise commits that many quarter turns as a real move. */
-  commitInteractiveTwist(axis: MoveSpec['axis'], layers: MoveSpec['layers'], quarterTurns: MoveSpec['quarterTurns'] | 0): void {
+  /**
+   * Ends the drag. The layer eases from `fromAngle` (where the finger let go)
+   * to `turns` whole quarter turns instead of jumping there, then commits.
+   * `turns` may be any integer - a 270° drag lands visually where it was
+   * released and is recorded as the equivalent single counter-turn; 0 or a
+   * full 360° cancel without recording a move.
+   */
+  releaseInteractiveTwist(axis: MoveSpec['axis'], layers: MoveSpec['layers'], fromAngle: number, turns: number): void {
+    this.noteInteraction()
+    this.dragging = false
+    const to = turns * (Math.PI / 2)
+    const remainingQuarterTurns = Math.abs(to - fromAngle) / (Math.PI / 2)
+    this.settle = {
+      axis,
+      layers,
+      quarterTurns: normalizeQuarterTurns(turns),
+      from: fromAngle,
+      to,
+      start: performance.now(),
+      durationMs: Math.max(SETTLE_MIN_MS, remainingQuarterTurns * SETTLE_MS_PER_QUARTER_TURN),
+    }
+  }
+
+  private stepSettle(now: number): void {
+    const settle = this.settle
+    if (!settle) return
+    const t = Math.min((now - settle.start) / settle.durationMs, 1)
+    this.pivot.quaternion.setFromAxisAngle(AXIS_VECTORS[settle.axis], settle.from + (settle.to - settle.from) * easeOutCubic(t))
+    if (t >= 1) this.finishSettle()
+  }
+
+  private finishSettle(): void {
+    const settle = this.settle
+    if (!settle) return
+    this.settle = null
     for (const cubie of this.interactionAffected) this.root.add(cubie.object)
     this.pivot.quaternion.identity()
-    if (quarterTurns !== 0) {
-      applyMove(this.cubies, { axis, layers, quarterTurns })
-    }
     this.interactionAffected = []
-    for (const listener of this.moveDoneListeners) listener()
+    if (settle.quarterTurns !== 0) {
+      applyMove(this.cubies, { axis: settle.axis, layers: settle.layers, quarterTurns: settle.quarterTurns })
+      for (const listener of this.moveDoneListeners) listener()
+    }
     this.notifySolvedChange()
     this.processQueue()
     this.notifyBusyChange()
@@ -430,8 +503,11 @@ export class CubeRenderer {
   private animate(now?: number): void {
     this.rafId = requestAnimationFrame(this.animate)
     const time = now ?? performance.now()
-    this.controls.autoRotate = !this.isBusy && time - this.lastInteractionAt > IDLE_AUTOROTATE_DELAY_MS
+    // Ambient spin is for look-only cubes (lesson demos). On a cube you can twist it just moves
+    // the target out from under your finger between turns.
+    this.controls.autoRotate = !this.twistEnabled && !this.isBusy && time - this.lastInteractionAt > IDLE_AUTOROTATE_DELAY_MS
     this.controls.update()
+    if (this.settle) this.stepSettle(time)
     if (this.isAnimatingQueue) this.stepQueueAnimation(time)
     if (this.highlightedMeshes.length > 0) {
       const pulse = 0.28 + 0.32 * (0.5 + 0.5 * Math.sin(time * 0.006))
@@ -443,3 +519,4 @@ export class CubeRenderer {
     this.renderer.render(this.scene, this.camera)
   }
 }
+

@@ -6,7 +6,7 @@ import { btnGhost, btnPrimary } from '../ui/styles'
 const STEPS = [
   {
     title: 'Learn on a live cube',
-    body: 'Every lesson plays the algorithm on a 3×3 you can orbit. Drag the background to turn the camera. Drag a face to twist it; smear onto the next layer for a wide turn.',
+    body: 'Every lesson plays the algorithm on a 3×3 you can orbit. Drag the background to turn the camera. Swipe a row or column to twist just that layer.',
   },
   {
     title: 'Then drill it',
