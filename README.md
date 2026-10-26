@@ -1,32 +1,30 @@
-# React + TypeScript + Vite
+# Twist — Learn to solve the cube
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Interactive 3×3 Rubik's Cube tutorial with a live Three.js cube. Teaches the beginner method first, then your choice of CFOP, Roux, or ZZ — all four methods ship today, with a timed trainer (execute + recognition), a sandbox with timer, daily drill quotas, and progress that persists locally.
 
-Currently, two official plugins are available:
+Production: https://rubikscube-xi.vercel.app
+Also published as a lab at https://raymondriter.dev/labs/twist
+Jira: project `RUBIKSCUBE` at https://rpr2998.atlassian.net
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Run
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
+npm run dev              # http://localhost:5173
+npm test                 # Vitest
+npm run build            # standalone -> dist/
+npm run build:portfolio  # lab edition -> dist-portfolio/
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## Stack
+
+Vite, React 19, TypeScript, Tailwind 4, Three.js (no React Three Fiber), Zustand (persisted progress store), React Router, Vitest, Oxlint.
+
+## Project docs
+
+See `AGENTS.md` in this folder for the full architecture notes: the cubie-based engine in `src/engine`, the lesson/case content model in `src/data`, trainer and progress-store conventions, the portfolio-edition build rules (hash routing, base path, the literal `/labs` backlink the host validator checks), and the current build history and next-up work (Phase 7 monetization).
+
+## Status notes
+
+- Cube skins ship free with a picker in Settings (RUBIKSCUBE-62, Done). Selling skins is a separate Phase 7 question (RUBIKSCUBE-45/-49/-50).
+- Production deploys are currently blocked by an invalid `VERCEL_TOKEN` secret (RUBIKSCUBE-61) — token rotation is an owner action.
